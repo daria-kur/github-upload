@@ -1,0 +1,5 @@
+mkdir daria
+cd /home/daria/daria
+touch tmp.txt
+nano tmp.txt
+mv -n tmp.txt task_1.txt

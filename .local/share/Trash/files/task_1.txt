@@ -1,0 +1,4 @@
+mkdir daria
+cd /home/daria/daria
+nano tmp.txt
+

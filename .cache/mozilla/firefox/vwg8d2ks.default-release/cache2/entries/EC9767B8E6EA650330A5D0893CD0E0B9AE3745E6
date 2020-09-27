@@ -1,0 +1,586 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+define(function(requirejs) {
+    "use strict";
+
+    var $ = requirejs('jquery');
+    var utils = requirejs('base/js/utils');
+
+    var Contents = function(options) {
+        /**
+         * Constructor
+         *
+         * Preliminary documentation for the REST API is at 
+         * https://github.com/ipython/ipython/wiki/IPEP-27%3A-Contents-Service
+         *
+         * A contents handles passing file operations
+         * to the back-end.  This includes checkpointing
+         * with the normal file operations.
+         *
+         * Parameters:
+         *  options: dictionary
+         *      Dictionary of keyword arguments.
+         *          base_url: string
+         */
+        this.base_url = options.base_url;
+    };
+
+    /** Error type */
+    Contents.DIRECTORY_NOT_EMPTY_ERROR = 'DirectoryNotEmptyError';
+
+    Contents.DirectoryNotEmptyError = function() {
+        // Constructor
+        //
+        // An error representing the result of attempting to delete a non-empty
+        // directory.
+        this.message = 'A directory must be empty before being deleted.';
+    };
+    
+    Contents.DirectoryNotEmptyError.prototype = Object.create(Error.prototype);
+    Contents.DirectoryNotEmptyError.prototype.name =
+        Contents.DIRECTORY_NOT_EMPTY_ERROR;
+
+
+    Contents.prototype.api_url = function() {
+        var url_parts = [
+            this.base_url, 'api/contents',
+            utils.url_join_encode.apply(null, arguments),
+        ];
+        return utils.url_path_join.apply(null, url_parts);
+    };
+
+    /**
+     * Creates a basic error handler that wraps a jqXHR error as an Error.
+     *
+     * Takes a callback that accepts an Error, and returns a callback that can
+     * be passed directly to $.ajax, which will wrap the error from jQuery
+     * as an Error, and pass that to the original callback.
+     *
+     * @method create_basic_error_handler
+     * @param{Function} callback
+     * @return{Function}
+     */
+    Contents.prototype.create_basic_error_handler = function(callback) {
+        if (!callback) {
+            return utils.log_ajax_error;
+        }
+        return function(xhr, status, error) {
+            callback(utils.wrap_ajax_error(xhr, status, error));
+        };
+    };
+
+    /**
+     * File Functions (including notebook operations)
+     */
+
+    /**
+     * Get a file.
+     *
+     * @method get
+     * @param {String} path
+     * @param {Object} options
+     *    type : 'notebook', 'file', or 'directory'
+     *    format: 'text' or 'base64'; only relevant for type: 'file'
+     *    content: true or false; // whether to include the content
+     */
+    Contents.prototype.get = function (path, options) {
+        /**
+         * We do the call with settings so we can set cache to false.
+         */
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "GET",
+            dataType : "json",
+        };
+        var url = this.api_url(path);
+        var params = {};
+        if (options.type) { params.type = options.type; }
+        if (options.format) { params.format = options.format; }
+        if (options.content === false) { params.content = '0'; }
+        return utils.promising_ajax(url + '?' + $.param(params), settings);
+    };
+
+
+    /**
+     * Creates a new untitled file or directory in the specified directory path.
+     *
+     * @method new
+     * @param {String} path: the directory in which to create the new file/directory
+     * @param {Object} options:
+     *      ext: file extension to use
+     *      type: model type to create ('notebook', 'file', or 'directory')
+     */
+    Contents.prototype.new_untitled = function(path, options) {
+        var data = JSON.stringify({
+          ext: options.ext,
+          type: options.type
+        });
+
+        var settings = {
+            processData : false,
+            type : "POST",
+            data: data,
+            contentType: 'application/json',
+            dataType : "json",
+        };
+        return utils.promising_ajax(this.api_url(path), settings);
+    };
+
+    Contents.prototype.delete = function(path) {
+        var settings = {
+            processData : false,
+            type : "DELETE",
+            dataType : "json",
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings).catch(
+            // Translate certain errors to more specific ones.
+            function(error) {
+                // TODO: update IPEP27 to specify errors more precisely, so
+                // that error types can be detected here with certainty.
+                if (error.xhr.status === 400) {
+                    throw new Contents.DirectoryNotEmptyError();
+                }
+                throw error;
+            }
+        );
+    };
+
+    Contents.prototype.rename = function(path, new_path) {
+        var data = {path: new_path};
+        var settings = {
+            processData : false,
+            type : "PATCH",
+            data : JSON.stringify(data),
+            dataType: "json",
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.trust = function(path) {
+        var settings = {
+            processData : false,
+            type : "POST",
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path, "trust");
+        return utils.promising_ajax(url, settings);
+    }
+
+    Contents.prototype.save = function(path, model) {
+        /**
+         * We do the call with settings so we can set cache to false.
+         */
+        var settings = {
+            processData : false,
+            type : "PUT",
+            dataType: "json",
+            data : JSON.stringify(model),
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings);
+    };
+    
+    Contents.prototype.copy = function(from_file, to_dir) {
+        /**
+         * Copy a file into a given directory via POST
+         * The server will select the name of the copied file
+         */
+        var url = this.api_url(to_dir);
+        
+        var settings = {
+            processData : false,
+            type: "POST",
+            data: JSON.stringify({copy_from: from_file}),
+            contentType: 'application/json',
+            dataType : "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    /**
+     * Checkpointing Functions
+     */
+
+    Contents.prototype.create_checkpoint = function(path) {
+        var url = this.api_url(path, 'checkpoints');
+        var settings = {
+            type : "POST",
+            contentType: false,  // no data
+            dataType : "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.list_checkpoints = function(path) {
+        var url = this.api_url(path, 'checkpoints');
+        var settings = {
+            type : "GET",
+            cache: false,
+            dataType: "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.restore_checkpoint = function(path, checkpoint_id) {
+        var url = this.api_url(path, 'checkpoints', checkpoint_id);
+        var settings = {
+            type : "POST",
+            contentType: false,  // no data
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.delete_checkpoint = function(path, checkpoint_id) {
+        var url = this.api_url(path, 'checkpoints', checkpoint_id);
+        var settings = {
+            type : "DELETE",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    /**
+     * File management functions
+     */
+
+    /**
+     * List notebooks and directories at a given path
+     *
+     * On success, load_callback is called with an array of dictionaries
+     * representing individual files or directories.  Each dictionary has
+     * the keys:
+     *     type: "notebook" or "directory"
+     *     created: created date
+     *     last_modified: last modified dat
+     * @method list_notebooks
+     * @param {String} path The path to list notebooks in
+     */
+    Contents.prototype.list_contents = function(path) {
+        return this.get(path, {type: 'directory'});
+    };
+
+    return {'Contents': Contents};
+});
+        20200831163820F      define   callback   $   utils   Contents   requirejs   jquery   base/js/utils-   DirectoryNotEmptyError3   DIRECTORY_NOT_EMPTY_ERROR?   Contents.DirectoryNotEmptyError   Object   create   Error   prototype	   name5   Contents.prototype.api_url   api_url[   Contents.prototype.create_basic_error_handler5   create_basic_error_handler-   Contents.prototype.get   get?   Contents.prototype.new_untitled   new_untitled3   Contents.prototype.delete   delete3   Contents.prototype.rename   rename1   Contents.prototype.trust   trust/   Contents.prototype.save	   save/   Contents.prototype.copy	   copyI   Contents.prototype.create_checkpoint#   create_checkpointG   Contents.prototype.list_checkpoints!   list_checkpointsK   Contents.prototype.restore_checkpoint%   restore_checkpointI   Contents.prototype.delete_checkpoint#   delete_checkpointA   Contents.prototype.list_contents   list_contents   options   .this   base_url	   path   settings   url   params   processData   cache	   type   dataType   GET	   json   format   content   0   promising_ajax   ?   param   url_parts   arguments   api/contents   url_join_encode   apply   url_path_join   checkpoints    Ú       Ú   ¿         Ú   // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+define(function(requirejs) {
+    "use strict";
+
+    var $ = requirejs('jquery');
+    var utils = requirejs('base/js/utils');
+
+    var Contents = function(options) {
+        /**
+         * Constructor
+         *
+         * Preliminary documentation for the REST API is at 
+         * https://github.com/ipython/ipython/wiki/IPEP-27%3A-Contents-Service
+         *
+         * A contents handles passing file operations
+         * to the back-end.  This includes checkpointing
+         * with the normal file operations.
+         *
+         * Parameters:
+         *  options: dictionary
+         *      Dictionary of keyword arguments.
+         *          base_url: string
+         */
+        this.base_url = options.base_url;
+    };
+
+    /** Error type */
+    Contents.DIRECTORY_NOT_EMPTY_ERROR = 'DirectoryNotEmptyError';
+
+    Contents.DirectoryNotEmptyError = function() {
+        // Constructor
+        //
+        // An error representing the result of attempting to delete a non-empty
+        // directory.
+        this.message = 'A directory must be empty before being deleted.';
+    };
+    
+    Contents.DirectoryNotEmptyError.prototype = Object.create(Error.prototype);
+    Contents.DirectoryNotEmptyError.prototype.name =
+        Contents.DIRECTORY_NOT_EMPTY_ERROR;
+
+
+    Contents.prototype.api_url = function() {
+        var url_parts = [
+            this.base_url, 'api/contents',
+            utils.url_join_encode.apply(null, arguments),
+        ];
+        return utils.url_path_join.apply(null, url_parts);
+    };
+
+    /**
+     * Creates a basic error handler that wraps a jqXHR error as an Error.
+     *
+     * Takes a callback that accepts an Error, and returns a callback that can
+     * be passed directly to $.ajax, which will wrap the error from jQuery
+     * as an Error, and pass that to the original callback.
+     *
+     * @method create_basic_error_handler
+     * @param{Function} callback
+     * @return{Function}
+     */
+    Contents.prototype.create_basic_error_handler = function(callback) {
+        if (!callback) {
+            return utils.log_ajax_error;
+        }
+        return function(xhr, status, error) {
+            callback(utils.wrap_ajax_error(xhr, status, error));
+        };
+    };
+
+    /**
+     * File Functions (including notebook operations)
+     */
+
+    /**
+     * Get a file.
+     *
+     * @method get
+     * @param {String} path
+     * @param {Object} options
+     *    type : 'notebook', 'file', or 'directory'
+     *    format: 'text' or 'base64'; only relevant for type: 'file'
+     *    content: true or false; // whether to include the content
+     */
+    Contents.prototype.get = function (path, options) {
+        /**
+         * We do the call with settings so we can set cache to false.
+         */
+        var settings = {
+            processData : false,
+            cache : false,
+            type : "GET",
+            dataType : "json",
+        };
+        var url = this.api_url(path);
+        var params = {};
+        if (options.type) { params.type = options.type; }
+        if (options.format) { params.format = options.format; }
+        if (options.content === false) { params.content = '0'; }
+        return utils.promising_ajax(url + '?' + $.param(params), settings);
+    };
+
+
+    /**
+     * Creates a new untitled file or directory in the specified directory path.
+     *
+     * @method new
+     * @param {String} path: the directory in which to create the new file/directory
+     * @param {Object} options:
+     *      ext: file extension to use
+     *      type: model type to create ('notebook', 'file', or 'directory')
+     */
+    Contents.prototype.new_untitled = function(path, options) {
+        var data = JSON.stringify({
+          ext: options.ext,
+          type: options.type
+        });
+
+        var settings = {
+            processData : false,
+            type : "POST",
+            data: data,
+            contentType: 'application/json',
+            dataType : "json",
+        };
+        return utils.promising_ajax(this.api_url(path), settings);
+    };
+
+    Contents.prototype.delete = function(path) {
+        var settings = {
+            processData : false,
+            type : "DELETE",
+            dataType : "json",
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings).catch(
+            // Translate certain errors to more specific ones.
+            function(error) {
+                // TODO: update IPEP27 to specify errors more precisely, so
+                // that error types can be detected here with certainty.
+                if (error.xhr.status === 400) {
+                    throw new Contents.DirectoryNotEmptyError();
+                }
+                throw error;
+            }
+        );
+    };
+
+    Contents.prototype.rename = function(path, new_path) {
+        var data = {path: new_path};
+        var settings = {
+            processData : false,
+            type : "PATCH",
+            data : JSON.stringify(data),
+            dataType: "json",
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.trust = function(path) {
+        var settings = {
+            processData : false,
+            type : "POST",
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path, "trust");
+        return utils.promising_ajax(url, settings);
+    }
+
+    Contents.prototype.save = function(path, model) {
+        /**
+         * We do the call with settings so we can set cache to false.
+         */
+        var settings = {
+            processData : false,
+            type : "PUT",
+            dataType: "json",
+            data : JSON.stringify(model),
+            contentType: 'application/json',
+        };
+        var url = this.api_url(path);
+        return utils.promising_ajax(url, settings);
+    };
+    
+    Contents.prototype.copy = function(from_file, to_dir) {
+        /**
+         * Copy a file into a given directory via POST
+         * The server will select the name of the copied file
+         */
+        var url = this.api_url(to_dir);
+        
+        var settings = {
+            processData : false,
+            type: "POST",
+            data: JSON.stringify({copy_from: from_file}),
+            contentType: 'application/json',
+            dataType : "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    /**
+     * Checkpointing Functions
+     */
+
+    Contents.prototype.create_checkpoint = function(path) {
+        var url = this.api_url(path, 'checkpoints');
+        var settings = {
+            type : "POST",
+            contentType: false,  // no data
+            dataType : "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.list_checkpoints = function(path) {
+        var url = this.api_url(path, 'checkpoints');
+        var settings = {
+            type : "GET",
+            cache: false,
+            dataType: "json",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.restore_checkpoint = function(path, checkpoint_id) {
+        var url = this.api_url(path, 'checkpoints', checkpoint_id);
+        var settings = {
+            type : "POST",
+            contentType: false,  // no data
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    Contents.prototype.delete_checkpoint = function(path, checkpoint_id) {
+        var url = this.api_url(path, 'checkpoints', checkpoint_id);
+        var settings = {
+            type : "DELETE",
+        };
+        return utils.promising_ajax(url, settings);
+    };
+
+    /**
+     * File management functions
+     */
+
+    /**
+     * List notebooks and directories at a given path
+     *
+     * On success, load_callback is called with an array of dictionaries
+     * representing individual files or directories.  Each dictionary has
+     * the keys:
+     *     type: "notebook" or "directory"
+     *     created: created date
+     *     last_modified: last modified dat
+     * @method list_notebooks
+     * @param {String} path The path to list notebooks in
+     */
+    Contents.prototype.list_contents = function(path) {
+        return this.get(path, {type: 'directory'});
+    };
+
+    return {'Contents': Contents};
+});
+  B   http://localhost:8888/static/services/contents.js?v=20200924133834   ≥!´!Ä!´!ˇˇˇˇ            é!´!    å!´!ç!´!     † w   Ô   o   Ô   @       *   ≥!´!å!´!ˇˇˇˇ                      é!´!   é!´!   å!´!ç!´!     †
+     @  ˘   @   
+         ≥!´!å!´!ˇˇˇˇ   ,   -          é!´!.   öò;¯                                    ﬁ    ﬂæ   Ω  G   N   ﬂ¶F `Pí0 P    5ûé!´!   é!´!	   å!´!ç!´!    	  †
+   À  ß  √  ß      .         5ûé!´!   é!´!   é!´!   é!´!   é!´!   å!´!ç!´!      †   ä  Y  Ç  Y  -   )      ≥!´!å!´!ˇˇˇˇ   ?   @   -            é!´!.   é!´!A   é!´!B   é!´!C   é!´!D   öò;¯g                                     	 ‹   ﬂﬁ   ﬂg   æ  G   h       h   ø   G   ·H   ‰æ  x h       ﬂø   G   ·H   ‰æ   x £¶< `P5 .: ñ PM2 `Pñ P3 Q  5ûé!´!   å!´!ç!´!    	 †   ;  	  3  	  @   <   @    å!´! †´  	  £  	  D             5ûä!´!é!´!    5ûé!´!   å!´!ç!´!     †   ∏
+    Ø
+     W   &      ≥!´!å!´!ˇˇˇˇ   /   ,   0   1   2   -          å!´!é!´!       é!´!3   ã!´!é!´!4   ã!´!é!´!5   ã!´!é!´!6   ã!´!    é!´!3   é!´!4   é!´!7   é!´!5   é!´!8   é!´!6   é!´!   å!´!é!´!            é!´!9   é!´!:   é!´!;   é!´!<   é!´!=   é!´!>   öò;¯˝   V                     
+            ﬁ   ﬂ5   9   9      9      9       ﬂæ  ·H   ‰Ω  v    ﬂ5	      ﬂΩ G   õ   ò   æ  Ω G   N   ﬂò   Ω G
+   õ   ò   æ  Ω G
+   N
+   ﬂò   Ω G   õ   ò   æ     N   ﬂò   ø   ·H   ‰æ     %ø   ·H   ‰æ  v %æ   v £¶F[ `P5 6 6 : Oa `P.P8 `P: `Pí `Pó0 `Pí `Pó0 `Pî `Pî0 `P¶ *P(ˇˇˇ„P3 Q   5ûé!´!   å!´!ç!´!    	 †   °  )  ô  )  s   .         5ûé!´!   å!´!ç!´!    	 †   T  Ó  L  Ó  É   (       å!´! †ë  ›  â  ›  å             5û 5ûé!´!   å!´!ç!´!    	 †     Ö    Ö  ó   (         5ûé!´!   å!´!ç!´!    	 †   Ø  ≠  ß  ≠  §   '         5ûé!´!   å!´!ç!´!    	 †   ’  v  Õ  v  Æ   &         5ûé!´!   å!´!ç!´!    	 †    £  ï  õ  ï  Ω   &         5ûé!´!!   å!´!ç!´!    	 †"   ˚  ¸  Û  ¸  “   3         5ûé!´!#   å!´!ç!´!     †$   1    )     ‹   2   
+   ≥!´!å!´!ˇˇˇˇ   /   1   0   -          é!´!   é!´!E   å!´!é!´!       é!´!5   ã!´!é!´!4   ã!´!é!´!6   ã!´!    é!´!7   é!´!5   é!´!4   é!´!8   é!´!6   é!´!<   öò;¯^   )                                 ﬁ   ﬂæ  ·H   ‰Ω     v     ﬂ5      9   9      9      ﬂø   ·H	   ‰æ   æ  v £¶6 `Pì P8 `P5 : 6 ?0 `Pî P3 Q     5ûé!´!%   å!´!ç!´!    	 †&   U  U  M  U  Ê   4         5ûé!´!'   å!´!ç!´!    	 †(   ã  a  É  a  Ô   3         5ûé!´!)   å!´!ç!´!    	 †*   Ü   »   ~   »     /         5ûé!´!+   å!´!é!´!       é!´!   ã!´!    é!´!   öò;¯Œ  ≈                              C    - Ω      v À   ﬂΩ      v À   ﬂm   À   ﬂø      N   ﬂø   m   N   ﬂø   G   º   ·H   ‰º	   G
+   v N
+   ﬂø   G   G
+   ø   G   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m   N   ﬂø   G
+   m    N!   ﬂø   G
+   m"   N#   ﬂø   G
+   m$   N%   ﬂø   G
+   m&   N'   ﬂ5(   ø   9)   £¶0@ `P)	P9 `P)	PI
+ `PK `Pê@  `Pê@( `P† 3P9 `P?ê@- `Pï@@ `Pï@W `Pï@s `Pï@Ä  É `Pï@Ä  ó `Pï@Ä  § `Pï@Ä  Æ `Pï@Ä  Ω `Pï@Ä  “ `Pï@Ä  ‹ `Pï@Ä  Ê `Pï@Ä  Ô `Pï@Ä  `Pï0000 `P%:Q   5ûöò;¯                                       º   Ç   m   z ﬂ¶@`P/PDÄ P  û“:†‰      _l∆ˇ_l« B&vbr8zh   C    :http://localhost:8888/static/services/contents.js?v=20200924133834 necko:classified 1 strongly-framed 1 request-method GET response-head HTTP/1.1 200 OK
+Server: TornadoServer/6.0.4
+Content-Type: application/javascript
+Date: Thu, 24 Sep 2020 10:39:36 GMT
+X-Content-Type-Options: nosniff
+Content-Security-Policy: frame-ancestors 'self'; report-uri /api/security/csp-report
+Accept-Ranges: bytes
+Last-Modified: Wed, 23 Sep 2020 05:59:55 GMT
+Expires: Sun, 22 Sep 2030 10:39:36 GMT
+Cache-Control: max-age=315360000
+Content-Length: 8434
+ original-response-headers Server: TornadoServer/6.0.4
+Content-Type: application/javascript
+Date: Thu, 24 Sep 2020 10:39:36 GMT
+X-Content-Type-Options: nosniff
+Content-Security-Policy: frame-ancestors 'self'; report-uri /api/security/csp-report
+Accept-Ranges: bytes
+Last-Modified: Wed, 23 Sep 2020 05:59:55 GMT
+Expires: Sun, 22 Sep 2030 10:39:36 GMT
+Cache-Control: max-age=315360000
+Content-Length: 8434
+ ctid 2 uncompressed-len 0 net-response-time-onstart 84 net-response-time-onstop 84 alt-data 1;8434,javascript/moz-bytecode-20200831163820 alt-data-from-child 1   T˘

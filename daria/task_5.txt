@@ -1,0 +1,2 @@
+cat task_1.txt > task_3.txt
+cp task_1.txt task_4.txt

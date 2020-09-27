@@ -1,0 +1,12 @@
+{
+  "base_url": "/",
+  "hostname": "localhost",
+  "notebook_dir": "/home/daria",
+  "password": false,
+  "pid": 3000,
+  "port": 8888,
+  "secure": false,
+  "sock": "",
+  "token": "50afeb0c51b801f03813b33ba88c146ade39e41fb943c3fd",
+  "url": "http://localhost:8888/"
+}

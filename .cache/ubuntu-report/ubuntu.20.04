@@ -1,0 +1,78 @@
+{
+  "Version": "20.04",
+  "OEM": {
+    "Vendor": "Gigabyte Technology Co., Ltd.",
+    "Product": "H61M-D2-B3",
+    "Family": ""
+  },
+  "BIOS": {
+    "Vendor": "Award Software International, Inc.",
+    "Version": "F4"
+  },
+  "CPU": {
+    "OpMode": "32-bit, 64-bit",
+    "CPUs": "4",
+    "Threads": "1",
+    "Cores": "4",
+    "Sockets": "1",
+    "Vendor": "GenuineIntel",
+    "Family": "6",
+    "Model": "42",
+    "Stepping": "7",
+    "Name": "Intel(R) Core(TM) i5-2300 CPU @ 2.80GHz",
+    "Virtualization": "VT-x"
+  },
+  "Arch": "amd64",
+  "GPU": [
+    {
+      "Vendor": "8086",
+      "Model": "0102"
+    }
+  ],
+  "RAM": 1.9,
+  "Disks": [
+    500.1
+  ],
+  "Partitions": [
+    115.8,
+    0.5
+  ],
+  "Screens": [
+    {
+      "Size": "480mmx270mm",
+      "Resolution": "1920x1080",
+      "Frequency": "60.00"
+    }
+  ],
+  "Autologin": true,
+  "LivePatch": false,
+  "Session": {
+    "DE": "ubuntu:GNOME",
+    "Name": "ubuntu",
+    "Type": "x11"
+  },
+  "Language": "ru_RU",
+  "Timezone": "Europe/Kaliningrad",
+  "Install": {
+    "Media": "Ubuntu 20.04.1 LTS \"Focal Fossa\" - Release amd64 (20200731)",
+    "Type": "GTK",
+    "OEM": false,
+    "PartitionMethod": "resize_use_free",
+    "DownloadUpdates": false,
+    "Language": "ru",
+    "Minimal": false,
+    "RestrictedAddons": false,
+    "Stages": {
+      "0": "language",
+      "1": "language",
+      "27": "prepare",
+      "51": "partman",
+      "58": "partman",
+      "85": "start_install",
+      "137": "timezone",
+      "178": "usersetup",
+      "287": "user_done",
+      "676": "done"
+    }
+  }
+}

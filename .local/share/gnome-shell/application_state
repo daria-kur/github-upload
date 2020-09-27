@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<application-state>
+  <context id="">
+    <application id="org.gnome.Nautilus.desktop" score="413.03158569335938" last-seen="1600944160"/>
+    <application id="org.gnome.FileRoller.desktop" score="0.375" last-seen="1600841546"/>
+    <application id="firefox.desktop" score="22202.933013916016" last-seen="1601191183"/>
+    <application id="libreoffice-writer.desktop" score="43" last-seen="1600945061"/>
+    <application id="thunderbird.desktop" score="8" last-seen="1600841284"/>
+    <application id="org.gnome.Terminal.desktop" score="138.10128784179688" last-seen="1601191100"/>
+    <application id="update-manager.desktop" score="0" last-seen="1600840576"/>
+    <application id="gkbd-keyboard-display.desktop" score="1" last-seen="1600880597"/>
+  </context>
+</application-state>

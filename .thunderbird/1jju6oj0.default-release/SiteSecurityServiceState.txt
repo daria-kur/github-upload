@@ -1,0 +1,6 @@
+o2.mail.ru:HSTS	0	18528	1632377267762,1,1,2
+start.thunderbird.net:HSTS	0	18528	1632377269527,1,0,2
+autoconfig.mail.ru:HSTS	0	18528	1632377214250,1,1,2
+autoconfig.thunderbird.net:HSTS	0	18528	1632377213144,1,0,2
+mail.ru:HSTS	0	18528	1616911614206,1,0,2
+location.services.mozilla.com:HSTS	0	18528	1632377152633,1,1,2

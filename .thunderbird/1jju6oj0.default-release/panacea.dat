@@ -1,0 +1,89 @@
+// <!-- <mdb:mork:z v="1.4"/> -->
+< <(a=c)> // (f=iso-8859-1)
+  (8A=charset)(8B=boxFlags)(8C=hierDelim)(8D=onlineName)(8E=aclFlags)
+  (8F=serverTotal)(90=serverUnseen)(91=serverRecent)(92=indexingPriority)
+  (93=folderName)(94=applyIncomingFilters.empty)(95=applyIncomingFilters)
+  (96=MRUTime)(97=nextUID)(98=lastSyncTimeInSec)
+  (99=dobayes.mailnews@mozilla.org#junk.empty)
+  (9A=dobayes.mailnews@mozilla.org#junk)
+  (80=ns:msg:db:row:scope:folders:all)(81=ns:msg:db:table:kind:folders)
+  (82=key)(83=flags)(84=totalMsgs)(85=totalUnreadMsgs)
+  (86=pendingUnreadMsgs)(87=pendingMsgs)(88=expungedBytes)(89=folderSize)>
+
+<(80
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/I\
+NBOX.msf)(BB=88083014)(82=0)(84=windows-1251)(BC=4040)(A2=2f)(86=INBOX)
+  (C0=719)(C1=52)(C3=1600841276)(C2=1208)(88
+    =/home/daria/.thunderbird/1jju6oj0.default-release/Mail/Local Folders/Tras\
+h.msf)(89=104)(83=ffffffffffffffff)(8E=$D0$A3$D0$B4$D0$B0$D0$BB$D1$91$D0$BD$D0\
+$BD$D1$8B$D0$B5)(8B
+    =/home/daria/.thunderbird/1jju6oj0.default-release/Mail/Local Folders/Unse\
+nt Messages.msf)(8C=804)(8F=$D0$98$D1$81$D1$85$D0$BE$D0$B4$D1$8F$D1$89$D0$B8$D0\
+$B5)(90
+    =/home/daria/.thunderbird/1jju6oj0.default-release/Mail/Local Folders)
+  (91=1c)(92=ffffffff)(93=)(94=$D0$9B$D0$BE$D0$BA$D0$B0$D0$BB$D1$8C$D0$BD$D1$8B\
+$D0$B5 $D0$BF$D0$B0$D0$BF$D0$BA$D0$B8)(95
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/D\
+rafts.msf)(85=5e)(96=Drafts)(97
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/T\
+emplates.msf)(BF=400000)(98=Templates)(99
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/S\
+ent.msf)(9A=Sent)(9B
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/A\
+rchives.msf)(BE=4000)(9C=Archives)(9E
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/M\
+a&BD0EPQ-.msf)(A0=8082014)(A1=40)(9F=Ma&BD0EPQ-)(A3
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/L\
+'ecole.msf)(A4=L'ecole)(A5
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/&\
+BBwEMAQ8BDA-.msf)(A6=&BBwEMAQ8BDA-)(A7
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/&\
+BCEEPwQwBDw-.msf)(AA=40082014)(AB=1040)(A8=&BCEEPwQwBDw-)(A9=-1)(AC
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/&\
+BB4EQgQ,BEAEMAQyBDsENQQ9BD0ESwQ1-.msf)(AF=8082214)(B0=2040)(AD
+    =&BB4EQgQ,BEAEMAQyBDsENQQ9BD0ESwQ1-)(AE=60)(B1
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/&\
+BCcENQRABD0EPgQyBDgEOgQ4-.msf)(B3=8082414)(B4=840)(B2
+    =&BCcENQRABD0EPgQyBDgEOgQ4-)(B5
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/&\
+BBoEPgRABDcEOAQ9BDA-.msf)(B7=82114)(B8=10040)(B6=&BBoEPgRABDcEOAQ9BDA-)
+  (B9
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru/A\
+rchive.msf)(BA=Archive)(C4
+    =/home/daria/.thunderbird/1jju6oj0.default-release/ImapMail/imap.mail.ru)>
+{1:^80 {(k^81:c)(s=9)} 
+  [1(^82^80)(^83^BB)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89=0)(^8A^84)
+    (^8B^BC)(^8C=2f)(^8D^86)(^8E=0)(^8F^C0)(^90=52)(^91=0)(^96^C3)(^97^C2)
+    (^98=0)]
+  [2(^82^88)(^83^89)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^93^8E)]
+  [3(^82^8B)(^83^8C)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^93^8F)]
+  [4(^82^90)(^83=1c)(^84^92)(^85^92)(^86=0)(^87=0)(^88=0)(^89^83)(^8A=)
+    (^93^94)]
+  [5(^82^95)(^83=0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=0)(^8C=5e)(^8D^96)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [6(^82^97)(^83^BF)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=0)(^8C=5e)(^8D^98)(^8E=0)(^8F=0)(^90=0)(^91=0)(^98=0)]
+  [7(^82^99)(^83=0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=0)(^8C=5e)(^8D^9A)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [8(^82^9B)(^83^BE)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=0)(^8C=5e)(^8D^9C)(^8E=0)(^8F=0)(^90=0)(^91=0)(^98=0)]
+  [9(^82^9E)(^83^A0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=40)(^8C=2f)(^8D^9F)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [A(^82^A3)(^83^A0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=40)(^8C=2f)(^8D^A4)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [B(^82^A5)(^83^A0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=40)(^8C=2f)(^8D^A6)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [C(^82^A7)(^83^AA)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B^AB)(^8C=2f)(^8D^A8)(^8E=0)(^8F=0)(^90=0)(^91=0)(^92=-1)]
+  [D(^82^AC)(^83^AF)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B^B0)(^8C=2f)(^8D^AD)(^8E=0)(^8F=0)(^90=0)(^91=0)(^92=60)]
+  [E(^82^B1)(^83^B3)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B^B4)(^8C=2f)(^8D^B2)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [F(^82^B5)(^83^B7)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B^B8)(^8C=2f)(^8D^B6)(^8E=0)(^8F=0)(^90=0)(^91=0)(^92=-1)]
+  [10(^82^B9)(^83^A0)(^84=0)(^85=0)(^86=0)(^87=0)(^88=0)(^89^83)(^8A^84)
+    (^8B=40)(^8C=2f)(^8D^BA)(^8E=0)(^8F=0)(^90=0)(^91=0)]
+  [11(^82^C4)(^83=0)(^84^92)(^85^92)(^86=0)(^87=0)(^88=0)(^89^83)(^8A=)
+    (^8B=0)(^8C=5e)(^8D=)(^8E=0)(^8F=0)(^90=0)(^91=0)]}
